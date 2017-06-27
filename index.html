@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nesto</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.2.1.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <form>
+        <div style="margin-top: 5%" class="form-group">
+            <div class="row">
+                <div class="col-xs-12">
+                    <label for="query_input">Insert query:</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <textarea cols="50" rows="5" class="form-control" id="query_input"></textarea>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-xs-6">
+                    <input type="submit" class="btn btn btn-success form-control" value="Pass" id="pass_data">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    $(document).on("click", "#pass_data", function (e) {
+        e.preventDefault();
+        let query = $("#query_input").val();
+        let url = "192.168.178.23/parse";
+
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: {
+                policy: query
+            }
+        }).done((response) => {
+            console.log(response);
+        });
+    });
+</script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<!--<script src="js/bootstrap.min.js"></script>-->
+</body>
+</html>
