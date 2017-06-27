@@ -35,11 +35,12 @@
     $(document).on("click", "#pass_data", function (e) {
         e.preventDefault();
         let query = $("#query_input").val();
-        let url = "192.168.178.23/parse";
+        let url = "https://192.168.178.23:3000/parse";
 
         $.ajax({
             url: url,
             method: "POST",
+            dataType: "json",
             data: {
                 policy: query
             }
