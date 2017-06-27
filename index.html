@@ -19,35 +19,100 @@
             </div>
             <div class="row">
                 <div class="col-xs-12">
-                    <textarea cols="50" rows="5" class="form-control" id="query_input"></textarea>
+                    <textarea cols="50" rows="5" class="form-control" id="query_input">ALLOW MANAGE WHERE { SERVICE <http://intent> { ?r a int:Requester . ?a a acl:CreateGraph . ?a int:graph ?sp } ?sp a univ:StudyProgram . ?sp univ:faculty ?f . ?r univ:works at ?f } PRIORITY 3
+                    </textarea>
                 </div>
             </div>
             <div class="row" style="margin-top: 10px">
                 <div class="col-xs-6">
-                    <input type="submit" class="btn btn btn-success form-control" value="Pass" id="pass_data">
+                    <input type="submit" class="btn btn btn-success form-control" value="Parse" id="pass_data">
                 </div>
             </div>
         </div>
     </form>
+    <div id="result"></div>
 </div>
 
 <script>
+    let keys = [];
+
     $(document).on("click", "#pass_data", function (e) {
+
         e.preventDefault();
         let query = $("#query_input").val();
-        let url = "https://192.168.178.23:3000/parse";
+        let url = "http://192.168.178.23:3000/parse";
 
         $.ajax({
             url: url,
             method: "POST",
-            dataType: "json",
-            data: {
+            cache: false,
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            data: JSON.stringify({
                 policy: query
-            }
+            })
         }).done((response) => {
-            console.log(response);
+            let valueHTML = '';
+            for (let key in response){
+                if (response.hasOwnProperty(key)) {
+                    keys.push(key);
+                    let id = keys.length;
+
+                    valueHTML += `
+                        <div style="margin-top: 15px">
+                        <h3>${key}</h3>
+                        <select id="select_${id}">
+                    `;
+
+                    for(let i = 0; i < response[key].length; i++) {
+                        valueHTML += `
+                            <option value="${response[key][i]}">${response[key][i]}</option>
+                        `;
+                    }
+
+                    valueHTML +=`
+                        </select>
+                        </div>
+                    `;
+                }
+            }
+
+            let resultDiv = $("#result");
+
+            resultDiv.append(valueHTML);
+
+            resultDiv.parent().append(`
+                <button class="btn btn-info" id="execute" style="margin-top: 10px">Execute</button>
+            `);
         });
     });
+
+    $(document).on("click", "#execute", function (e) {
+        e.preventDefault();
+        let query = $("#query_input").val();
+        let url = "http://192.168.178.23:3000/execute";
+        let values = {};
+
+        for (let i = 0; i < keys.length; i++) {
+            let select = $("#select_"+ (i+1));
+            values[keys[i]] = select.val();
+        }
+
+        $.ajax({
+            url: url,
+            method: "POST",
+            cache: false,
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            data: JSON.stringify({
+                policy: query,
+                variables: values
+            })
+        }).done( (response) => {
+            keys = [];
+            console.log(response);
+        });
+    })
 </script>
 
 <!-- Include all compiled plugins (below), or include individual files as needed -->
